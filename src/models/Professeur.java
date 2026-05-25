@@ -49,9 +49,10 @@ public class Professeur extends Personne {
      */
     public static Professeur creer(String nom, String prenom, Sexe sexe) {
 
-        return registre.validerEtEnregistrer(
-                new Professeur(nom, prenom, sexe)
-        );
+        if (nom == null || prenom == null || sexe == null)
+            throw new IllegalArgumentException("Le Prof ne peut pas etre null");
+
+        return registre.validerEtEnregistrer(new Professeur(nom, prenom, sexe));
     }
 
 

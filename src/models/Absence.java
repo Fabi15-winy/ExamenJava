@@ -46,6 +46,11 @@ public class Absence {
 
             throw new IllegalArgumentException("La date ne correspond pas au jour de la séance");
         }
+
+        if (personne == null || seance == null ) {
+            throw new IllegalArgumentException("Absence invalide");
+        }
+
         return registre.validerEtEnregistrer(new Absence(personne, seance, certificat,dateAbsence));
     }
 

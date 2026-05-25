@@ -57,6 +57,10 @@ public class Etudiant extends Personne {
      * @return étudiant créé
      */
     public static Etudiant creer(String nom, String prenom, Sexe sexe) {
+
+        if (nom == null || prenom == null || sexe == null)
+            throw new IllegalArgumentException("Étudiant invalide");
+
         return registre.validerEtEnregistrer(new Etudiant(nom, prenom, sexe));
     }
 

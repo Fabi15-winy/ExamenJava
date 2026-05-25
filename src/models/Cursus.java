@@ -53,6 +53,8 @@ public class Cursus {
      * @return cursus existant ou nouvellement créé
      */
     public static Cursus creer(String codeCursus, String nomCursus) {
+        if (codeCursus == null || nomCursus == null) throw new IllegalArgumentException("Cursus invalide");
+
         return registre.validerEtEnregistrer(
                 new Cursus(codeCursus, nomCursus)
         );

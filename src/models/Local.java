@@ -35,7 +35,11 @@ public class Local {
      * @param nomLocal nom du local
      * @return instance unique (anti-doublon)
      */
-    public static Local creer(String numLocal, String nomLocal) {return registre.validerEtEnregistrer(new Local(numLocal, nomLocal));
+    public static Local creer(String numLocal, String nomLocal) {
+        if (numLocal == null || nomLocal == null) {
+            throw new IllegalArgumentException("Le Local ne doit pas être null");
+        }
+        return registre.validerEtEnregistrer(new Local(numLocal, nomLocal));
     }
 
 

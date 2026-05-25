@@ -54,6 +54,14 @@ public class Cours {
      * @return cours existant ou le cours nouvellement créé
      */
     public static Cours creer(String codeCours, String libelle, int coefficient, int nombreSeance) {
+
+        if (codeCours == null || libelle == null ) throw new IllegalArgumentException("Cours invalide");
+
+        if (coefficient <= 0 || nombreSeance <= 0)
+            throw new IllegalArgumentException("Cours invalide : coefficient," +
+                    " nombreSeance doivent être positif");
+
+
         return registre.validerEtEnregistrer(new Cours(codeCours, libelle, coefficient, nombreSeance ));
     }
 

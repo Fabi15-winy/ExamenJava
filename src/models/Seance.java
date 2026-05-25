@@ -59,6 +59,10 @@ public class Seance {
      */
 
     public static Seance creer(Jour jour, Horaire horaire, Cours cours, Professeur prof, Local local) {
+
+        if (jour == null || horaire == null || cours == null || prof == null || local == null)
+            throw new IllegalArgumentException("La Seance ne peut pas être null");
+
         return registre.validerEtEnregistrer(new Seance(jour, horaire, cours, prof, local)
         );
     }
