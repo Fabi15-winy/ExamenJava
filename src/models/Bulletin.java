@@ -1,38 +1,92 @@
+/**
+ * @auteur: Takam winy
+ * @IA: GPT-5 pour la documentation.
+ */
+
 package models;
 
 import enums.Session;
 
 import java.util.*;
 
+/**
+ * Représente le bulletin d'un étudiant.
+ *
+ * Un bulletin contient :
+ * – une liste de notes
+ * – une logique de sélection des meilleures notes
+ * – un calcul de moyenne pondérée.
+ */
 public class Bulletin {
-    private int anneeAcademique;
+
+    private String anneeAcademique;
     private Etudiant etudiant;
     private List<Note> notes;
 
-    public Bulletin(int anneeAcademique, Etudiant etudiant) {
+    /**
+     * Constructeur du bulletin
+     */
+    public Bulletin(String anneeAcademique, Etudiant etudiant) {
         this.anneeAcademique = anneeAcademique;
         this.etudiant = etudiant;
         this.notes = new ArrayList<>();
     }
 
-    // ajouter une note
+
+    // GETTERS
+
+    public String getAnneeAcademique() {
+        return anneeAcademique;
+    }
+
+    /**
+     * @return toutes les notes du bulletin
+     */
+    public List<Note> getNotes() {
+        return Collections.unmodifiableList(notes);
+    }
+
+
+    // GESTION DES NOTES
+
+    /**
+     * Ajoute une note au bulletin
+     * Une note est acceptée uniquement si l'étudiant
+     * peut présenter l'examen du cours.
+     */
     public void ajouterNote(Note note) {
+
+        if (note == null) {
+            throw new IllegalArgumentException("La note ne peut pas être null");
+        }
+
+        if (!etudiant.peutPresenterExamen(note.getCours())) {
+
+            throw new IllegalStateException(etudiant.getPrenom() + " ne peut pas présenter l'examen de "
+                            + note.getCours().getLibelle() + " en raison de ses absences!\n");
+        }
+
         notes.add(note);
     }
 
-    public List<Note> getNotes() {
-        return notes;
-    }
-
+    /**
+     * Détermine si une nouvelle note est meilleure qu'une ancienne
+     * (priorité à la session AOUT)
+     */
     boolean estMeilleureNote(Note nouvelle, Note ancienne) {
-
         if (nouvelle.getSession() == Session.AOUT) {
             return true;
         }
-
         return ancienne.getSession() != Session.AOUT;
     }
 
+    /**
+     * Détermine si une nouvelle note est meilleure qu'une ancienne
+     *  (priorité à la session AOUT)
+     *
+     *  Calcule la moyenne pondérée du bulletin
+     *
+     */
     public double calculerMoyenne() {
 
         Map<Cours, Note> meilleuresNotes = new HashMap<>();
@@ -42,15 +96,12 @@ public class Bulletin {
             Cours cours = n.getCours();
 
             if (!meilleuresNotes.containsKey(cours)) {
-
                 meilleuresNotes.put(cours, n);
-
             } else {
 
                 Note existante = meilleuresNotes.get(cours);
 
                 if (estMeilleureNote(n, existante)) {
-
                     meilleuresNotes.put(cours, n);
                 }
             }
@@ -64,58 +115,15 @@ public class Bulletin {
             coeffTotal += n.getCours().getCoefficient();
         }
 
-        if (coeffTotal == 0) return 0;
+        double moyenne;
 
-        return total / coeffTotal;
-    }
-
-    private Map<Cours, Note> getMeilleuresNotesParCours() {
-
-        Map<Cours, Note> meilleures = new HashMap<>();
-
-        for (Note n : notes) {
-
-            Cours cours = n.getCours();
-
-            if (!meilleures.containsKey(cours)) {
-                meilleures.put(cours, n);
-            } else {
-
-                Note existante = meilleures.get(cours);
-
-                if (n.getSession() == Session.AOUT
-                        || (n.getSession() == Session.JUIN
-                        && existante.getSession() != Session.AOUT)) {
-
-                    meilleures.put(cours, n);
-                }
-            }
+        if (coeffTotal == 0) {
+            moyenne = 0;
+        } else {
+            moyenne = total / coeffTotal;
         }
 
-        return meilleures;
+        return Math.round(moyenne * 100.0) / 100.0;
     }
-    public void afficherBulletin() {
 
-        System.out.println("===== BULLETIN =====");
-        System.out.println("Étudiant : " + etudiant.getNom() + " " + etudiant.getPrenom());
-        System.out.println("Année : " + anneeAcademique);
-        System.out.println("--------------------------------");
-
-        Map<Cours, Note> map = getMeilleuresNotesParCours();
-
-        for (Map.Entry<Cours, Note> entry : map.entrySet()) {
-
-            Cours c = entry.getKey();
-            Note n = entry.getValue();
-
-            String statut = (n.getValeur() >= 10) ? "VALIDÉ" : "AJOURNÉ";
-
-            System.out.println(
-                    c.getLibelle()
-                            + " | models.Note : " + n.getValeur()
-                            + " | enums.Session : " + n.getSession()
-                            + " | " + statut
-            );
-        }
-    }
 }

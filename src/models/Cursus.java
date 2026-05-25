@@ -1,91 +1,173 @@
+/**
+ * @auteur: Takam winy
+ * @IA: GPT-5 pour la documentation.
+ */
+
 package models;
 
-import enums.Jour;
+import factory.RegistreFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
+/**
+ * Représente un cursus académique.
+ *
+ * Un cursus contient :
+ * — un code unique
+ * — un nom
+ * — une liste de cours
+ * — un planning de séances.
+ */
 public class Cursus {
+
     private String codeCursus;
     private String nomCursus;
-    private List<Cours> cours = new ArrayList<>();
-    private List<Seance> planning = new ArrayList<>();;
 
-    public Cursus(String codeCursus,String nomCursus) {
+    private List<Cours> cours;
+    private List<Seance> planning;
+
+    private static final RegistreFactory<Cursus> registre = new RegistreFactory<>();
+
+    /**
+     * Constructeur privé.
+     * Utiliser Cursus.creer(...) pour créer un cursus.
+     *
+     * @param codeCursus code unique du cursus
+     * @param nomCursus nom du cursus
+     */
+    private Cursus(String codeCursus, String nomCursus) {
         this.codeCursus = codeCursus;
         this.nomCursus = nomCursus;
+        this.cours = new ArrayList<>();
+        this.planning = new ArrayList<>();
+    }
 
+    /**
+     * Crée un cursus unique.
+     *
+     * @param codeCursus code du cursus
+     * @param nomCursus nom du cursus
+     * @return cursus existant ou nouvellement créé
+     */
+    public static Cursus creer(String codeCursus, String nomCursus) {
+        return registre.validerEtEnregistrer(
+                new Cursus(codeCursus, nomCursus)
+        );
     }
 
 
-    //methodes
+    // GESTION DES COURS
 
 
-
+    /**
+     * Ajoute un cours au cursus.
+     *
+     * @param c cours à ajouter
+     */
     public void ajouterCours(Cours c) {
-        cours.add(c);
+        if (c != null && !cours.contains(c)) {
+            cours.add(c);
+        }
     }
-    public void ajouterSeance(Seance nouvelleSeance) {
+
+
+    // GESTION DU PLANNING
+
+
+    /**
+     * Ajoute une séance au planning en vérifiant :
+     * — les conflits de local ;
+     * — les conflits de professeur.
+     *
+     * @param nouvelleSeance séance à ajouter
+     * @return true si la séance est ajoutée, false sinon
+     */
+    public boolean ajouterSeance(Seance nouvelleSeance) {
+
+        if (nouvelleSeance == null) {
+            return false;
+        }
 
         for (Seance s : planning) {
 
-            boolean memeCreneau =
-                    s.getJour() == nouvelleSeance.getJour()
-                            && s.getHoraire() == nouvelleSeance.getHoraire();
+            boolean memeCreneau = s.getJour() == nouvelleSeance.getJour() && s.getHoraire() == nouvelleSeance.getHoraire();
 
             if (memeCreneau) {
 
-                // 🔴 conflit local
-                if (s.getLocal().getNomLocal()
-                        .equals(nouvelleSeance.getLocal().getNomLocal())) {
-
-                    System.out.println("❌ Conflit local : "
-                            + s.getLocal().getNomLocal());
-
-                    return;
+                // Conflit de local
+                if (s.getLocal().equals(nouvelleSeance.getLocal())) {
+                    System.out.println("le local est déja occupé");
+                    return false;
                 }
 
-                // 🔴 conflit professeur
-                if (s.getProf().getMatricule()
-                        .equals(nouvelleSeance.getProf().getMatricule())) {
-
-                    System.out.println("❌ Conflit professeur : "
-                            + s.getProf().getNom());
-
-                    return;
+                // Conflit de professeur
+                if (s.getProf().equals(nouvelleSeance.getProf())) {
+                    System.out.println("le prof est déja occupé");
+                    return false;
                 }
             }
         }
 
         planning.add(nouvelleSeance);
-
-        System.out.println("✅ Séance ajoutée avec succès");
+        return true;
     }
 
-    public List<Cours> getCours() {
-        return cours;
+
+    // GETTERS && SETTERS
+
+
+    public String getCodeCursus() {
+        return codeCursus;
     }
+
     public String getNomCursus() {
         return nomCursus;
     }
 
+    /**
+     * @return liste non modifiable des cours
+     */
+    public List<Cours> getCours() {
+        return Collections.unmodifiableList(cours);
+    }
+
+    /**
+     * @return liste non modifiable des séances
+     */
     public List<Seance> getPlanning() {
-        return planning;
+        return Collections.unmodifiableList(planning);
     }
 
-    public void afficherPlanningSemaine() {
 
-        for (Jour j : Jour.values()) {
+    // EQUALS && HASHCODE
 
-            System.out.println("\n=== " + j + " ===");
 
-            for (Seance s : planning) {
-
-                if (s.getJour() == j) {
-
-                    System.out.println(s);
-                }
-            }
-        }
+    /**
+     * Deux cursus sont identiques s'ils possèdent
+     * le même code.
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Cursus)) return false;
+        Cursus cursus = (Cursus) o;
+        return Objects.equals(codeCursus, cursus.codeCursus);
     }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(codeCursus);
+    }
+
+
+    // AFFICHAGE
+
+
+    @Override
+    public String toString() {
+        return nomCursus;
+    }
 }
